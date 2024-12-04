@@ -10,10 +10,10 @@ const pageViewOptions = [
 ];
 
 export default function Price() {
-    const [pageViewIndex, setPageViewIndex] = useState<number>(0);
     const [isYearlyBilling, setIsYearlyBilling] = useState<boolean>(false);
     const [darkMode, setDarkMode] = useState<boolean>(false);
     const [isDragging, setIsDragging] = useState<boolean>(false);
+    const [newPercentage, setNewPercentage] = useState<number>(0);
 
     const sliderRef = useRef<HTMLDivElement>(null);
     const thumbRef = useRef<HTMLDivElement>(null);
@@ -31,7 +31,8 @@ export default function Price() {
     }, []);
 
     const getPrice = () => {
-        const price = pageViewOptions[pageViewIndex].price;
+        const index = Math.floor(newPercentage * (pageViewOptions.length - 1));
+        const price = pageViewOptions[index].price;
         return isYearlyBilling ? (price * 12 * 0.75).toFixed(2) : price.toFixed(2);
     };
 
@@ -52,19 +53,17 @@ export default function Price() {
         if (isDragging && sliderRef.current && thumbRef.current) {
             const boundingBox = sliderRef.current.getBoundingClientRect();
             const offsetX = event.clientX - boundingBox.left;
-
-            const constrainedX = Math.min(
-                Math.max(0, offsetX),
-                boundingBox.width
-            );
-
+            const constrainedX = Math.min(Math.max(0, offsetX), boundingBox.width);
             const newPercentage = constrainedX / boundingBox.width;
-            const newIndex = Math.round(newPercentage * (pageViewOptions.length - 1));
-
-            setPageViewIndex(newIndex);
-
+            setNewPercentage(newPercentage);
+            sliderRef.current.style.background = `linear-gradient(to right, #4CAF50 ${(newPercentage) * 100}%, #ddd ${(newPercentage) * 100}%)`;
             thumbRef.current.style.left = `${newPercentage * 100}%`;
         }
+    };
+
+    const getCurrentViews = () => { 
+        const index = Math.floor(newPercentage * (pageViewOptions.length - 1));
+        return pageViewOptions[index].views;
     };
 
     return (
@@ -78,42 +77,33 @@ export default function Price() {
                 </button>
             </div>
 
-            <div className="flex flex-col items-center justify-center min-h-screen">
-                <div className="flex flex-col items-center justify-center w-full max-w-md p-6 bg-white dark:bg-gray-800 shadow-md rounded-lg text-black dark:text-white">
-                    <div className="text-lg font-semibold mb-4">
-                        {pageViewOptions[pageViewIndex].views} Pageviews
+            <div className="flex flex-col items-center justify-center min-h-screen w-full">
+                <div className="flex flex-col items-center justify-center w-full max-w-lg p-6 bg-white dark:bg-gray-800 shadow-md rounded-lg text-black dark:text-white">
+                    <div className="flex items-center justify-center text-center">
+                        <div className="text-sm font-semibold font-manrope text-gray-400 mb-6 items-center justify-center">
+                            {getCurrentViews()} PAGEVIEWS
+                        </div>
+                        <div className="flex items-center space-x-2 mb-6 justify-center">
+                            <span className="text-3xl font-bold">${getPrice()}</span>
+                            <span className="text-xl text-gray-500 dark:text-gray-400">
+                                / {isYearlyBilling ? "year" : "month"}
+                            </span>
+                        </div>
                     </div>
-
                     <div
                         ref={sliderRef}
-                        className="relative w-full h-4 mb-6"
+                        className="relative w-[80%] h-4 mb-6 bg-gray-300 dark:bg-gray-600 rounded-full"  
                         onMouseMove={handleMouseMove}
                         onMouseUp={handleMouseUp}
                         onMouseLeave={handleMouseUp}
+                        style={{ background: '#ddd' }}  
                     >
-                        <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            width="100%"
-                            height="100%"
-                            viewBox="0 0 100 4"
-                            className="absolute inset-0"
-                        >
-                            <rect
-                                x="0"
-                                y="1"
-                                width="100"
-                                height="2"
-                                fill="#ddd"
-                                rx="1"
-                            />
-                        </svg>
-
                         <div
                             ref={thumbRef}
                             onMouseDown={handleMouseDown}
                             style={{
                                 position: "absolute",
-                                left: `${(pageViewIndex / (pageViewOptions.length - 1)) * 100}%`,
+                                left: `${newPercentage * 100}%`,
                                 top: "50%",
                                 transform: "translate(-50%, -50%)",
                                 width: "20px",
@@ -131,14 +121,6 @@ export default function Price() {
                             />
                         </div>
                     </div>
-
-                    <div className="flex items-center space-x-2 mb-6">
-                        <span className="text-3xl font-bold">${getPrice()}</span>
-                        <span className="text-xl text-gray-500 dark:text-gray-400">
-                            / {isYearlyBilling ? "year" : "month"}
-                        </span>
-                    </div>
-
                     <div className="flex items-center justify-between w-full mb-2">
                         <span className="text-gray-600 dark:text-gray-400">Monthly Billing</span>
                         <label className="flex items-center cursor-pointer">

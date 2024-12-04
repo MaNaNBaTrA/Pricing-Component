@@ -14,6 +14,11 @@
   }
 }
 
+@font-face {
+  font-family: 'Manrope';
+  src: url('../app/fonts/Manrope-VariableFont_wght.ttf') format('truetype'); 
+  font-style: normal;
+}
 body {
   color: var(--foreground);
   background: var(--background);
