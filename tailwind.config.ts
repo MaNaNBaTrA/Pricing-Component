@@ -9,6 +9,10 @@ export default {
   darkMode: 'class',
   theme: {
     extend: {
+      screens:{
+        'xs':'440px',
+        'exs':'380px'
+      },
       fontFamily: {
         manrope: ['Manrope', 'sans-serif'],
       },
@@ -27,6 +31,7 @@ export default {
         toggleBackground: "hsl(223, 50%, 87%)",  // Toggle Background
         grayishBlue: "hsl(225, 20%, 60%)",       // Text
         darkDesaturatedBlue: "hsl(227, 35%, 25%)" // Text & CTA Background
+        
       },
     },
   },
