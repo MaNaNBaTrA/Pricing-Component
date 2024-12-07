@@ -45,7 +45,7 @@ export default function Price() {
         setIsYearlyBilling(!isYearlyBilling);
     };
 
-    const handleMouseDown = (event: React.MouseEvent<HTMLDivElement>) => {
+    const handleMouseDown = (event: React.MouseEvent<HTMLDivElement> | React.TouchEvent<HTMLDivElement>) => {
         setIsDragging(true);
         event.preventDefault();
     };
@@ -54,10 +54,19 @@ export default function Price() {
         setIsDragging(false);
     };
 
-    const handleMouseMove = (event: React.MouseEvent<HTMLDivElement>) => {
+    const handleTouchMove = (event: React.TouchEvent<HTMLDivElement>) => {
+        handleMouseMove(event);
+    };
+
+    const handleTouchEnd = () => {
+        handleMouseUp();
+    };
+
+    const handleMouseMove = (event: React.MouseEvent<HTMLDivElement> | React.TouchEvent<HTMLDivElement>) => {
         if (isDragging && sliderRef.current && thumbRef.current) {
             const boundingBox = sliderRef.current.getBoundingClientRect();
-            const offsetX = event.clientX - boundingBox.left;
+            const clientX = "touches" in event ? event.touches[0].clientX : event.clientX;
+            const offsetX = clientX - boundingBox.left;
             const constrainedX = Math.min(Math.max(0, offsetX), boundingBox.width);
             const newPercentage = constrainedX / boundingBox.width;
             setNewPercentage(newPercentage);
@@ -101,7 +110,7 @@ export default function Price() {
 
 
             <div className="flex flex-col items-center justify-center min-h-screen w-full cursor-default">
-                <div className="w-[80%] min-w-[100px] flex flex-col items-center justify-center sm:w-full sm:max-w-xl xl:max-w-2xl 2xl:max-w-3xl bg-white dark:bg-[#31443d] shadow-md rounded-lg text-black dark:text-white sm:m-0 m-6 ">
+                <div className="w-[80%] min-w-[100px] flex flex-col items-center justify-center sm:w-full sm:max-w-xl xl:max-w-2xl 2xl:max-w-3xl bg-white dark:bg-[#31443d] shadow-md rounded-lg text-black dark:text-white sm:m-0 m-6 z-20">
                     <div className="flex items-center justify-around w-full text-center mx-6 my-10">
                         <div className="text-base font-bold font-manrope text-grayishBlue items-center justify-center tracking-widest ">
                             {getCurrentViews()} PAGEVIEWS
@@ -119,11 +128,15 @@ export default function Price() {
                         onMouseMove={handleMouseMove}
                         onMouseUp={handleMouseUp}
                         onMouseLeave={handleMouseUp}
+                        onTouchMove={handleTouchMove}
+                        onTouchEnd={handleTouchEnd}
+                        onTouchCancel={handleTouchEnd}
                         style={{ background: '#ddd' }}
                     >
                         <div
                             ref={thumbRef}
                             onMouseDown={handleMouseDown}
+                            onTouchStart={handleMouseDown}
                             style={{
                                 position: "absolute",
                                 left: `${newPercentage * 100}%`,
